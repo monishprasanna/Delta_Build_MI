@@ -1,6 +1,6 @@
-# AI-Powered Insurance Claims Agent
+# INSURANCE SMART CLAIM
 
-This repository contains an Anti-Gravity AI-powered insurance claims approval application built with React and Vite. It features a modern, 2D high-contrast black-and-white flat design aesthetic, simulating the end-to-end process of autonomous claim adjustment, including identity verification, liveness image acquisition, ML analysis, and smart-contract payment logic.
+This repository contains an INSURANCE SMART CLAIM application built with React and Vite. It features a modern, 2D high-contrast black-and-white flat design aesthetic, simulating the end-to-end process of autonomous claim adjustment, including identity verification, liveness image acquisition, ML analysis, and smart-contract payment logic.
 
 ## Application Features Overview
 - **Step 1:** Multi-Factor Authentication (MFA) & NLP pre-screening

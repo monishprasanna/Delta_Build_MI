@@ -28,7 +28,7 @@ function App() {
   return (
     <div className="app-container fade-in">
       <header className="app-header slide-up">
-        <h1>Anti-Gravity Claims</h1>
+        <h1>INSURANCE SMART CLAIM</h1>
         <p>AI-Powered Autonomous Claim Adjustment</p>
       </header>
 
