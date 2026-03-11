@@ -1,63 +1,77 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-
-// Note: Official CDP SDK allows you to configure with API Key ID & Private Key.
-// Depending on whether it's the EC private key or standard secret, we pass it based on SDK instructions.
-// Below we import the SDK, but we wrap it in a mock/try-catch mechanism for demonstration.
-const { Coinbase, Wallet } = require('@coinbase/coinbase-sdk');
+const { ethers } = require('ethers');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Set up the API Key config. Ensure your env variables match what the SDK expects.
-// If your private key doesn't have the standard BEGIN/END blocks, it might throw an error.
-const apiKeyName = process.env.CDP_API_KEY_NAME;
-const privateKey = process.env.CDP_API_KEY_PRIVATE_KEY?.replace(/\\n/g, '\n');
+const privateKey = process.env.PRIVATE_KEY;
+const rpcUrl = process.env.RPC_URL || "https://rpc.hoodi.com";
+
+let provider;
+let wallet;
 
 try {
-  if (apiKeyName && privateKey) {
-    Coinbase.configure({ apiKeyName: apiKeyName, privateKey: privateKey });
-    console.log("Coinbase SDK Configured successfully!");
+  if (privateKey) {
+    provider = new ethers.JsonRpcProvider(rpcUrl);
+    wallet = new ethers.Wallet(privateKey, provider);
+    console.log("Ethers Wallet Configured successfully! Address:", wallet.address);
   } else {
-    console.log("SDK not configured (Missing ENVs).");
+    console.log("Wallet not configured (Missing PRIVATE_KEY).");
   }
 } catch (e) {
-  console.error("SDK Configuration Error:", e.message);
+  console.error("Wallet Configuration Error:", e.message);
 }
 
+app.post('/api/address', async (req, res) => {
+  try {
+    if (wallet) {
+      res.json({ address: wallet.address });
+    } else {
+      res.json({ address: "Wallet not configured" });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.post('/api/transfer', async (req, res) => {
-  const { walletId, recipientAddress, amount, assetId } = req.body;
+  const { recipientAddress, amount } = req.body;
 
   try {
-    console.log(`Received request to transfer ${amount} ${assetId} to ${recipientAddress} via ${walletId}.`);
+    if (!wallet) throw new Error("Wallet not initialized. Check server config.");
 
-    // In a fully working production app where the SDK is completely set up:
-    // const wallet = await Wallet.import(walletId); 
-    // const transfer = await wallet.createTransfer({ amount, assetId, destination: recipientAddress });
-    // await transfer.wait();
+    console.log(`Received request to transfer ${amount} ETH to ${recipientAddress}`);
     
-    // Because we just supplied a partial key and we don't have a fully bootstrapped wallet ID registered
-    // on this account here yet, we'll simulate the response exactly how the real SDK would emit it:
+    const parsedAmount = ethers.parseEther(amount.toString());
+    const chainId = 560048; // Hoodi chain ID
     
-    // Mock the success structure returned by CDP SDK for frontend testing:
-    setTimeout(() => {
-      const isSuccess = Math.random() > 0.05; // 95% success rate
-      if (isSuccess) {
-        res.json({
-          status: 'success',
-          txHash: '0x' + Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join(''),
-          network: 'ethereum-sepolia',
-          explorerUrl: `https://sepolia.etherscan.io/tx/`,
-          timestamp: new Date().toLocaleString(),
-          recipient: recipientAddress,
-          amountSent: `${amount} ${assetId.toUpperCase()}`
-        });
-      } else {
-        res.status(500).json({ error: "Network error or insufficient funds simulated." });
-      }
-    }, 2000);
+    const tx = {
+      to: recipientAddress,
+      value: parsedAmount,
+      gasLimit: 21000,
+      maxFeePerGas: ethers.parseUnits("200", "gwei"),
+      maxPriorityFeePerGas: ethers.parseUnits("5", "gwei"),
+      chainId: chainId
+    };
+    
+    console.log("Sending transaction...");
+    const transaction = await wallet.sendTransaction(tx);
+    
+    console.log("Transaction sent! Hash:", transaction.hash);
+
+    res.json({
+      status: 'success',
+      txHash: transaction.hash,
+      network: 'hoodi-testnet',
+      explorerUrl: `https://hoodi.etherscan.io/tx/${transaction.hash}`,
+      timestamp: new Date().toLocaleString(),
+      recipient: recipientAddress,
+      sender: wallet.address,
+      amountSent: `${amount} ETH`
+    });
 
   } catch (err) {
     console.error(err);
@@ -67,5 +81,5 @@ app.post('/api/transfer', async (req, res) => {
 
 const PORT = 3001;
 app.listen(PORT, () => {
-  console.log(`Coinbase CDP Backend Proxy running on port ${PORT}`);
+  console.log(`Ethers Backend Proxy running on port ${PORT}`);
 });

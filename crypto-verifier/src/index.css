@@ -25,21 +25,21 @@ h2 { font-size: 2rem; border-bottom: 2px solid #000; padding-bottom: 0.5rem; dis
 h3 { font-size: 1.5rem; }
 p { margin-bottom: 1rem; }
 
-input, select, textarea {
+.app-container input, .app-container select, .app-container textarea {
   width: 100%; padding: 0.8rem 1rem; background: #ffffff;
   border: var(--border-style); border-radius: 0; color: var(--color-text-highlight);
   transition: all 0.2s ease; outline: none; font-family: inherit; font-size: 1rem;
 }
-input:focus, select:focus, textarea:focus { background: #f0f0f0; }
-label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600; color: var(--color-text-highlight); }
+.app-container input:focus, .app-container select:focus, .app-container textarea:focus { background: #f0f0f0; }
+.app-container label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600; color: var(--color-text-highlight); }
 
-button {
+.app-container button {
   cursor: pointer; padding: 0.8rem 1.5rem; border: var(--border-style); border-radius: 0;
   font-weight: 700; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s ease;
   background: #000000; color: #ffffff; font-family: inherit; font-size: 1rem;
 }
-button:hover { background: #ffffff; color: #000000; }
-button:disabled { opacity: 0.3; cursor: not-allowed; }
+.app-container button:hover { background: #ffffff; color: #000000; }
+.app-container button:disabled { opacity: 0.3; cursor: not-allowed; }
 
 .glass-card {
   background: var(--color-surface); border: var(--border-style); padding: 2rem; position: relative;
